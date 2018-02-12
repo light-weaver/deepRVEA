@@ -1,10 +1,10 @@
-function [errorVal,F2,Beta,InfoC] = DNevalnet(net)
+function [errorVal,F2,Beta,InfoC] = DNevalnet(net,parameters)
 %DNevalnet - Description
 %
 % Syntax: [fval,W,InfoC] = DNevalnet(net)
 %
 % Long description
-    global setno parameters
+    setno = 1;
 	in = parameters.dataset(setno).in;
 	out = parameters.dataset(setno).out;
 	outmax = max(out);

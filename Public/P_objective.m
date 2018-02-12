@@ -1,25 +1,50 @@
-function [Output, Boundary, Coding] = P_objective(Operation,wlog,M,Input)
+function [Output, Boundary, Coding] = P_objective(Operation,parameters,Input)
+% Operation defines the use case of this function
+%	case : init  to initialize the deep neural net population
+%	case : value to fine the error and complexity of the neural net population or individual
+%
+% parameters are all the parameters used in the code
+%
+% Input is the population size in case: init
+% Input is the population member/individual in case: value
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 	Boundary = NaN; Coding = NaN;
 	switch Operation
 		case 'init'
-			novar = length(wlog(1).in_index);
-			LB = []; UB = [];
-				for i = 1:M
-				LB = [LB; wlog(i).xmin];
-				UB = [UB; wlog(i).xmax];
-			end
-			LB = max(LB); UB = min(UB);
-			Output = rand(Input,novar);
-			for i = 1:novar
-				Output(:,i) = Output(:,i)*(UB(i)-LB(i))+LB(i);
+			whigh = 5; wlow = -5;
+			for layer = 1:(length(NNet_str)-1)
+				Output{layer} = rand(Input,NNet_str(layer)+1,NNet_str(layer+1))*(whigh-wlow)+wlow;
+				%Eliminating some matches
+				for i = 1:Input
+					for j = 1:NNet_str(layer)+1
+						for k = 1:NNet_str(layer+1)
+							if rand(1,1) < P_omit_match
+								Output{layer}(i,j,k) = 0;                
+							end
+						end
+					end
+				end
 			end
 			Coding = 'Real'; Boundary = [UB;LB];
 		case 'value'
-			Population = Input;
-			for i = 1:M 
-				FunctionValue(:,i) = evaluate_obj(Input, wlog(i));
+			F1 = zeros(length(Input{1}),1);
+			F2 = F1; IC = F1;
+			for i = 1:length(Input{1})
+				w = {};
+				for layer = 1:length(Input)
+					w{layer} = squeeze(Input{layer}(i,:,:));  
+				end
+				[fval,complexity,W,InfoC] = DNevalnet(w,parameters);
+				F1(i) = fval;
+				if isnan(F1(i)) || isinf(F1(i))
+					F1(i) = F_bad+eps; F2(i) = F_bad+eps;
+				end
+				F2(i) = complexity;
+				UW(i).W = W;
+				IC(i) = InfoC;
 			end
-			Output = FunctionValue;
+			Output = [F1 F2];
+			Boundary = []; Coding = [];
     end
 end

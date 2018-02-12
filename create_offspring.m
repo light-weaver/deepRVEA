@@ -16,14 +16,6 @@ for layer = 1:length(Prey)
 	Offsprng1{layer} = Prey{layer}(i,:,:);
 	Offsprng2{layer} = Prey{layer}(parent2,:,:);
 	switch cross_technique
-	% case 'long' fix
-	% 	for j = 1:nonodes
-	% 		if rand < P_node_xover
-	% 			Offsprng_tmp = Offsprng(1,j,:);
-	% 			Offsprng(1,j,:) = Offsprng(2,j,:);
-	% 			Offsprng(2,j,:) = Offsprng_tmp;
-	% 		end
-	% 	end
 	case 'short'
 		connections = numel(Offsprng1{layer});
 		exchange = binornd(connections,P_node_xover);
@@ -32,28 +24,6 @@ for layer = 1:length(Prey)
 		Offsprng1{layer}(exchange) = Offsprng2{layer}(exchange);
 		Offsprng2{layer}(exchange) = Offsprng_tmp(exchange);
 	end
-	%**********Mutations*********************
-	% for l = 1:2
-	% 	for j = 1:nonodes
-	% 		for k = 1:noinnodes
-	% 			if Offsprng(l,j,k) ~= 0 && rand < P_mutation
-	% 				%Find randomly two other individuals with current match active
-	% 				alternatives = find(Prey{layer}(:,j,k) ~= 0);
-	% 				alternatives(alternatives == i) = [];
-	% 				if length(alternatives) >= 2
-	% 					select1 = ceil(rand*length(alternatives));
-	% 					tmp = select1;
-	% 					select1 = alternatives(select1);
-	% 					alternatives(tmp) = [];
-	% 					select2 = ceil(rand*length(alternatives));
-	% 					select2 = alternatives(select2);
-	% 					%Self adapting mutation
-	% 					Offsprng(l,j,k) = Offsprng(l,j,k)+Mut_alfa*(1-generation/no_generations)*(Prey(select1,j,k)-Prey(select2,j,k));
-	% 				end
-	% 			end
-	% 		end
-	% 	end
-	%%Mutations!
 	switch mut_technique
 	case 'short'
 		connections = numel(Offsprng1{layer});

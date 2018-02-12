@@ -1,4 +1,4 @@
-function [Generations,N,varargout] = P_settings(Algorithm,Problem,M,parameters)
+function [Generations,N,varargout] = P_settings(parameters)
 %myFun - Description
 %
 % Syntax: [Generations,N,varargout] = myFun(input)

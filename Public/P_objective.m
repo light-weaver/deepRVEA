@@ -1,4 +1,4 @@
-function [Output, Boundary, Coding] = P_objective(Operation,parameters,Input)
+function [Output, IC] = P_objective(Operation,parameters,Input,final)
 % Operation defines the use case of this function
 %	case : init  to initialize the deep neural net population
 %	case : value to fine the error and complexity of the neural net population or individual
@@ -8,10 +8,11 @@ function [Output, Boundary, Coding] = P_objective(Operation,parameters,Input)
 % Input is the population size in case: init
 % Input is the population member/individual in case: value
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-	Boundary = NaN; Coding = NaN;
+    P_omit_match = 0.3;
+	IC = NaN;
 	switch Operation
 		case 'init'
+			NNet_str = parameters.NNet_str;
 			whigh = 5; wlow = -5;
 			for layer = 1:(length(NNet_str)-1)
 				Output{layer} = rand(Input,NNet_str(layer)+1,NNet_str(layer+1))*(whigh-wlow)+wlow;
@@ -26,11 +27,11 @@ function [Output, Boundary, Coding] = P_objective(Operation,parameters,Input)
 					end
 				end
 			end
-			Coding = 'Real'; Boundary = [UB;LB];
+			Coding = 'Real'; Boundary = [];
 		case 'value'
-			F1 = zeros(length(Input{1}),1);
+			F1 = zeros(size(Input{1},1),1);
 			F2 = F1; IC = F1;
-			for i = 1:length(Input{1})
+			for i = 1:size(Input{1},1)
 				w = {};
 				for layer = 1:length(Input)
 					w{layer} = squeeze(Input{layer}(i,:,:));  
@@ -45,6 +46,8 @@ function [Output, Boundary, Coding] = P_objective(Operation,parameters,Input)
 				IC(i) = InfoC;
 			end
 			Output = [F1 F2];
-			Boundary = []; Coding = [];
-    end
+			if ~final
+				IC =[];
+			end
+	end
 end

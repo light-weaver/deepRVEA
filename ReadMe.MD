@@ -15,5 +15,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-* To use the programme, please simply run Main.m
-* This source code includes benchmark test problems of DTLZ1 to DTLZ4 and SDTLZ1 to SDTLZ4
+Code Modified by Bhupinder Singh Saini to create Deep Neural Network surrogate models.
+
+Future Work: Fix the connection killing parameter
+			 Change the mutaion probability parameter

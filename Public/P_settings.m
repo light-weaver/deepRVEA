@@ -4,7 +4,7 @@ function [Generations,N,varargout] = P_settings(parameters)
 % Syntax: [Generations,N,varargout] = myFun(input)
 %
 % Long description
-	Generations = parameters.RVEAopt.Generations;
-	varargout = parameters.RVEAopt.p1p2;
-	N = parameters.RVEAopt.N;
+	Generations = parameters.Generations;
+	varargout = parameters.p1p2;
+	N = parameters.N;
 end

@@ -21,14 +21,13 @@ clc;format short;
 newpath = pwd;
 addpath([newpath '\Public'], [newpath '\RVEA']);
 warning off
-Objectives = length(parameters.out_index);
-%Algorithm = {'RVEA'};
 parameters = parameters.RVEAtrain;
+%Algorithm = {'RVEA'};
 filename = [Problem_name '.xls'];         %Data file
 in_index = parameters.in_index;           %independent variables column no.
 out_index = parameters.out_index;         %dependent variable column no.
 parameters.noinnodes = length(in_index);
-parameters.NNet_str = [noinnodes NNet_str];
+parameters.NNet_str = [parameters.noinnodes parameters.NNet_str];
 
 savedir = fullfile(pwd,'Output',Problem_name,'deepRVEA',parameters.name);
 mkdir(savedir);
@@ -56,8 +55,8 @@ parameters.Data_max = Data_max;
 
 
 for out = out_index
-	parameters.dataset(1).in = DataSet_sc(:,in_index);  %dataset(2)and so on will be later used for subsets.
-	parameters.dataset(1).out = DataSet(:,out_index);	%make sure to fix the code accordingly for that functionality later.
+	parameters.dataset.in = DataSet_sc(:,in_index);  %dataset(2)and so on will be later used for subsets.
+	parameters.dataset.out = DataSet(:,out);	%make sure to fix the code accordingly for that functionality later.
 	eval(['delete ' savedir '\Y' num2str(out-out_index(1)+1) '.mat'])
 	fprintf('\nStarting Deep Training on Objective %d\n',(out - out_index(1)+1));
 	MAIN(out,parameters,savedir)

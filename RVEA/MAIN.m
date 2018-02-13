@@ -2,8 +2,8 @@
 function MAIN(out_index,parameters,savedir)
 %clc;
 format compact;tic;
-disp(Problem);
-parameter.out =  out_index;
+%disp(Problem);
+parameters.out =  out_index;
 %basic settings
 [Generations,N,p1,p2] = P_settings(parameters);
 Evaluations = Generations*N; % max number of fitness evaluations
@@ -27,21 +27,29 @@ refV = (acosVV);
 
 %population initialization
 rand('seed', sum(100 * clock));
-[Population,Boundary,Coding] = P_objective('init',parameters,N);
-FunctionValue = P_objective('value',parameters,Population);
-
+[Population] = P_objective('init',parameters,N,0);
+FunctionValue = P_objective('value',parameters,Population,0);
+num_layers = length(parameters.NNet_str)-1;
+for layer = 1:num_layers
+    mutval{layer} = squeeze(std(Population{layer}));
+end
 for Gene = 0 : Generations - 1
     %random mating and reproduction
-    [MatingPool] = F_mating(Population);
-    Offspring = P_generator(MatingPool,Boundary,Coding,N);  FE = FE + size(Offspring, 1); %check that fix that
-    %Population = [Population; Offspring];
+    %[MatingPool,mutval] = F_mating(Population);
+    Offspring = P_generator(Population,mutval,Gene,Generations);  
+    %FE = FE + size(Offspring, 1); %check that fix that
     Population = insertOffspringToPopulation(Population,Offspring);
-    FunctionValue = [FunctionValue; P_objective('value',parameters,Offspring);];
-    
+    FunctionValue = [FunctionValue; P_objective('value',parameters,Offspring,0)];
     %APD based selection
     theta0 =  (Gene/(Generations))^alpha*(2);
     [Selection] = F_select(FunctionValue,V, theta0, refV);
-    Population = Population(Selection,:);
+    for i = 1:length(Selection)
+		for layer = 1:num_layers
+			newPopulation{layer}(i,:,:) = Population{layer}(Selection(i),:,:);
+			mutval{layer} = squeeze(std(Population{layer}));
+		end
+	end
+	Population = newPopulation;
     FunctionValue = FunctionValue(Selection,:);
 
     %reference vector adaption
@@ -59,10 +67,12 @@ for Gene = 0 : Generations - 1
         [scosineVV, neighbor] = sort(cosineVV, 2, 'descend');
         acosVV = acos(scosineVV(:,2));
         refV = (acosVV); 
-    end;
-
+	end
+	if rem(Gene,10) == 1
+	P_output(Population,toc,savedir,parameters,0);
+	end
     clc;
     fprintf('Progress %4s%%\n',num2str(round(Gene/Generations*100,-1)));
-end;
-P_output(Population,toc,'RVEA',Problem,obj_val,savedir);
+end
+P_output(Population,toc,savedir,parameters,1);
 end

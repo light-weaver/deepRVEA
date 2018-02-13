@@ -1,48 +1,47 @@
-function Offspring = P_generator(MatingPool,Boundary,Coding,MaxOffspring)
-% This function includes the SBX crossover operator and the polynomial
-% mutatoion operator. 
-
-
-    [N,D] = size(MatingPool);
-    if nargin < 4 || MaxOffspring < 1 || MaxOffspring > N
-        MaxOffspring = N;
-    end
-    
-    switch Coding
-        case 'Real'
-            ProC = 1;       
-            ProM = 1/D;     
-            DisC = 30;   	
-            DisM = 20;   	
-            Offspring = zeros(N,D);
-            for i = 1 : 2 : N
-                beta = zeros(1,D);
-                miu  = rand(1,D);
-                beta(miu<=0.5) = (2*miu(miu<=0.5)).^(1/(DisC+1));
-                beta(miu>0.5)  = (2-2*miu(miu>0.5)).^(-1/(DisC+1));
-                beta = beta.*(-1).^randi([0,1],1,D);
-                beta(rand(1,D)>ProC) = 1;
-                Offspring(i,:)   = (MatingPool(i,:)+MatingPool(i+1,:))/2+beta.*(MatingPool(i,:)-MatingPool(i+1,:))/2;
-                Offspring(i+1,:) = (MatingPool(i,:)+MatingPool(i+1,:))/2-beta.*(MatingPool(i,:)-MatingPool(i+1,:))/2;
-            end
-            Offspring = Offspring(1:MaxOffspring,:);
-
-            if MaxOffspring == 1
-                MaxValue = Boundary(1,:);
-                MinValue = Boundary(2,:);
-            else
-                MaxValue = repmat(Boundary(1,:),MaxOffspring,1);
-                MinValue = repmat(Boundary(2,:),MaxOffspring,1);
-            end
-            k    = rand(MaxOffspring,D);
-            miu  = rand(MaxOffspring,D);
-            Temp = k<=ProM & miu<0.5;
-            Offspring(Temp) = Offspring(Temp)+(MaxValue(Temp)-MinValue(Temp)).*((2.*miu(Temp)+(1-2.*miu(Temp)).*(1-(Offspring(Temp)-MinValue(Temp))./(MaxValue(Temp)-MinValue(Temp))).^(DisM+1)).^(1/(DisM+1))-1);
-            Temp = k<=ProM & miu>=0.5; 
-            Offspring(Temp) = Offspring(Temp)+(MaxValue(Temp)-MinValue(Temp)).*(1-(2.*(1-miu(Temp))+2.*(miu(Temp)-0.5).*(1-(MaxValue(Temp)-Offspring(Temp))./(MaxValue(Temp)-MinValue(Temp))).^(DisM+1)).^(1/(DisM+1)));
-
-            Offspring(Offspring>MaxValue) = MaxValue(Offspring>MaxValue);
-            Offspring(Offspring<MinValue) = MinValue(Offspring<MinValue);
-
-    end
+function offspring = P_generator(Input,mutval,generation,no_generations)
+%P_generator - Description
+%
+% Syntax: offspring = P_generator(input)
+%
+% Long description
+	P_node_xover = 0.8; %Prob with which a node is exchanged
+	P_mutation = 0.3;   %Prob with which a connection mutates
+	Mut_alfa = 0.7;     %Mutation parameter
+	P_kill_connection = 0.1;
+	% cross_technique = 'short';
+	% mut_technique = 'short';
+	num_runs = 1;
+	num_individuals = length(Input{1});
+	num_layers = length(Input);
+	off_count = 1;
+	for i = 1:num_runs
+		for ind = 1:num_individuals
+			p2 = ceil(rand*num_individuals);
+			for layer = 1:num_layers
+				Offsprng1{layer} = Input{layer}(ind,:,:);
+				Offsprng2{layer} = Input{layer}(p2,:,:);
+				%Crossover++++++++++++++++++++++++++++++++++++++
+				connections = numel(Offsprng1{layer});
+				exchange = binornd(connections,P_node_xover);
+				exchange = randperm(connections,exchange);
+				Offsprng_tmp = Offsprng1{layer};
+				Offsprng1{layer}(exchange) = Offsprng2{layer}(exchange);
+				Offsprng2{layer}(exchange) = Offsprng_tmp(exchange);
+				%Mutatuion+++++++++++++++++++++++++++++++++++++++
+				mutate = binornd(connections,P_mutation);
+				mutate = randperm(connections,mutate);
+				Offsprng1{layer}(mutate) = Offsprng1{layer}(mutate) + (-1).^round(rand(1,length(mutate))).*mutval{layer}(mutate)*Mut_alfa*(1-generation/no_generations);
+				Offsprng1{layer}(mutate(1:ceil(P_kill_connection*length(mutate)))) = 0;
+				mutate = binornd(connections,P_mutation);
+				mutate = randperm(connections,mutate);
+				%mutval = squeeze(std(Prey{layer}));
+				Offsprng2{layer}(mutate) = Offsprng2{layer}(mutate) + (-1).^round(rand(1,length(mutate))).*mutval{layer}(mutate)*Mut_alfa*(1-generation/no_generations);
+				Offsprng2{layer}(mutate(1:ceil(P_kill_connection*length(mutate)))) = 0;
+				%++++++++++++++++++++++++++++++++++++++++++++++++
+				offspring{layer}(off_count,:,:) = Offsprng1{layer};
+				offspring{layer}(off_count+1,:,:) = Offsprng2{layer};
+			end
+			off_count = off_count+2;
+		end
+	end
 end

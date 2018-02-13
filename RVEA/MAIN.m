@@ -3,11 +3,12 @@ function MAIN(out_index,parameters,savedir)
 %clc;
 format compact;tic;
 disp(Problem);
+parameter.out =  out_index;
 %basic settings
 [Generations,N,p1,p2] = P_settings(parameters);
 Evaluations = Generations*N; % max number of fitness evaluations
-alpha = parameters.RVEAopt.alpha; % the parameter in APD, the bigger, the faster RVEA converges
-fr = parameters.RVEAopt.fr; % frequency to call reference vector
+alpha = parameters.alpha; % the parameter in APD, the bigger, the faster RVEA converges
+fr = parameters.fr; % frequency to call reference vector
 FE = 0; % fitness evaluation counter
 
 %reference vector initialization
@@ -33,8 +34,9 @@ for Gene = 0 : Generations - 1
     %random mating and reproduction
     [MatingPool] = F_mating(Population);
     Offspring = P_generator(MatingPool,Boundary,Coding,N);  FE = FE + size(Offspring, 1); %check that fix that
-    Population = [Population; Offspring];
-    FunctionValue = [FunctionValue; P_objective('value',obj_val,Offspring);];
+    %Population = [Population; Offspring];
+    Population = insertOffspringToPopulation(Population,Offspring);
+    FunctionValue = [FunctionValue; P_objective('value',parameters,Offspring);];
     
     %APD based selection
     theta0 =  (Gene/(Generations))^alpha*(2);

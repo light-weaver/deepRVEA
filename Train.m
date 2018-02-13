@@ -51,13 +51,13 @@ end
 parameters.DataSet_sc = DataSet_sc;
 parameters.Data_min = Data_min;
 parameters.Data_max = Data_max;
-parameters.dataset(1).in = DataSet_sc(:,in_index);  %dataset(2)and so on will be later used for subsets.
-parameters.dataset(1).out = DataSet(:,out_index);	%make sure to fix the code accordingly for that functionality later.
 %============================================
 
 
 
 for out = out_index
+	parameters.dataset(1).in = DataSet_sc(:,in_index);  %dataset(2)and so on will be later used for subsets.
+	parameters.dataset(1).out = DataSet(:,out_index);	%make sure to fix the code accordingly for that functionality later.
 	eval(['delete ' savedir '\Y' num2str(out-out_index(1)+1) '.mat'])
 	fprintf('\nStarting Deep Training on Objective %d\n',(out - out_index(1)+1));
 	MAIN(out,parameters,savedir)

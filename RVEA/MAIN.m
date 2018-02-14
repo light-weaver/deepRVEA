@@ -1,10 +1,8 @@
-%RVEA Main File
+%RVEA Main File. Modified for deep learning.
 function MAIN(out_index,parameters,savedir)
 %clc;
 format compact;tic;
-%disp(Problem);
 parameters.out =  out_index;
-%basic settings
 [Generations,N,p1,p2] = P_settings(parameters);
 Evaluations = Generations*N; % max number of fitness evaluations
 alpha = parameters.alpha; % the parameter in APD, the bigger, the faster RVEA converges
@@ -17,7 +15,7 @@ for i = 1:N
     Vs(i,:) = Vs(i,:)./norm(Vs(i,:));
 end;
 V = Vs;
-Generations = floor(Evaluations/N);
+% Generations = floor(Evaluations/N);
 
 %calculat neighboring angle for angle normalization
 cosineVV = V*V';
